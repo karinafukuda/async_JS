@@ -23,23 +23,43 @@ const criaNovaLinha = (nome, email, id) => {
 const tabela = document.querySelector('[data-tabela]')
 //precisa inserir o elemento filho que foi criado junto ao elemento pai
 //appendChild recebe criaNovaLinha que recebe nome, email
-tabela.addEventListener('click',(evento) =>{
+tabela.addEventListener('click', async (evento) =>{
   let ehbotaoDeletar = evento.target.className === 
   'botao-simples botao-simples--excluir'
   if(ehbotaoDeletar){
-    const linhaCliente = evento.target.closest('[data-id]')//closest - o que tiver mais próximo
-    let id = linhaCliente.dataset.id
-    clienteService.removeCliente(id)
-    .then( () => {
+    try {
+      const linhaCliente = evento.target.closest('[data-id]')//closest - o que tiver mais próximo
+      let id = linhaCliente.dataset.id
+      await clienteService.removeCliente(id)
       linhaCliente.remove()
-    })
+    }
+    catch(erro) {
+      console.log(erro)
+      window.location.href = './erro.html'
+    }
+
   }
 })
 
-clienteService.listaClientes() 
-.then(data =>{
-     data.forEach(elemento => {
-      tabela.appendChild(criaNovaLinha(elemento.nome, elemento.email, elemento.id))
-})})
+const render = async () => {
+  try{
+      const listaClientes = await clienteService.listaClientes()
+
+      listaClientes.forEach( elemento => {
+        tabela.appendChild(criaNovaLinha(
+        elemento.nome, 
+        elemento.email, 
+        elemento.id
+      ))       
+    })
+
+  }
+  catch (erro){
+    console.log(erro)
+    window.location.href = './erro.html'
+  }
+  }
+
+  render()
 
 //JSON.parse transforma o retorno do elemento em válido como JS para o navegador
